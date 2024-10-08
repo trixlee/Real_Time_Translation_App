@@ -11,7 +11,7 @@ This application empowers users to upload video or audio files, automatically tr
 - **User-Friendly Interface**: A clean and minimalistic web interface for easy interaction.
 
 ## Project Structure
-real-time-translation-app/ 
+real-time-translation-app/
 │ 
 ├── backend/ 
 │ ├── uploads/ # Stores uploaded files and transcription results
@@ -34,13 +34,21 @@ Before you begin, ensure that you have the following installed:
    git clone https://github.com/your-username/real-time-translation-app.git
 
 2. **Navigate to the project directory**:
-   ```cd real-time-translation-app```
-3. **Install the required dependencies: In the backend/ directory, run the following command**:
-``` npm install ```
-4. **Start the server: To run the Express.js server, navigate to the backend/ directory and execute**:
-```node server.js ```
-5. **Access the application: Open your browser and navigate to**:
-   ``` http://localhost:3000 ```
+   ```
+    cd real-time-translation-app
+   ```
+4. **Install the required dependencies: In the backend/ directory, run the following command**:
+   ```
+   npm install
+   ```
+5. **Start the server: To run the Express.js server, navigate to the backend/ directory and execute**:
+   ```
+   node server.js
+    ```
+7. **Access the application: Open your browser and navigate to**:
+   ```
+   http://localhost:3000
+   ```
 *This will display the web interface where you can upload files and select a target language.*
 
 ## How It Works
