@@ -45,7 +45,7 @@ app.post('/upload', upload.single('file'), (req, res) => {
     console.log('Processing uploaded file:', file.originalname);
 
     // Start the transcription process using Whisper
-    const transcriptionProcess = exec(`whisper "${filePath}" --language fr --output_dir "${path.dirname(filePath)}"`);
+    const transcriptionProcess = exec(`whisper "${filePath}" --language en --output_dir "${path.dirname(filePath)}"`);
 
     // Set a timeout to handle hanging processes
     const timeout = setTimeout(() => {
@@ -61,6 +61,8 @@ app.post('/upload', upload.single('file'), (req, res) => {
             return res.status(500).json({ message: 'Error in transcription process.' });
         }
 
+        console.log('Whisper transcription completed successfully.');
+
         // Whisper generates a file with the same base name but with `.txt` extension
         const transcriptionFile = filePath.replace(path.extname(filePath), '.txt');
 
@@ -70,36 +72,46 @@ app.post('/upload', upload.single('file'), (req, res) => {
 
             // Get the target language from form data (default to French if not provided)
             const targetLanguage = req.body.language || 'fr';
+            console.log('Transcribed Text:', transcribedText);  // Log the transcribed text
+            console.log('Target Language:', targetLanguage);  // Log the target language
+
+            console.log('Starting translation via LibreTranslate...');
 
             // Translate the transcribed text
             const translatedText = await translateText(transcribedText, targetLanguage);
-            
+
+            console.log('LibreTranslate completed successfully.');
+
             // Send response with translated text
-            res.json({ message: 'Transcription and translation completed', translatedText });
+            return res.json({ message: 'Transcription and translation completed', translatedText });
         } catch (error) {
-            console.error('Error reading transcription file:', error.message);
-            res.status(500).json({ message: 'Failed to read transcription file.' });
+            console.error('Error during transcription or translation:', error.message);
+            return res.status(500).json({ message: 'Failed to complete the process.' });
         }
     });
 
     transcriptionProcess.on('error', (error) => {
         clearTimeout(timeout);
         console.error('Error in transcription process:', error);
-        res.status(500).json({ message: 'Error in transcription process.' });
+        return res.status(500).json({ message: 'Error in transcription process.' });
     });
 });
 
 // Function to translate text using LibreTranslate API
 async function translateText(text, targetLanguage) {
     try {
+        console.log('Text to translate:', text);  // Log the text to be translated
+        console.log('Target Language for translation:', targetLanguage);  // Log the target language
+
         const response = await axios.post('https://libretranslate.com/translate', {
             q: text,
             target: targetLanguage,
             source: 'auto'  // Auto-detect source language
         });
+
         return response.data.translatedText;
     } catch (error) {
-        console.error('Error translating text:', error);
+        console.error('Error translating text with LibreTranslate:', error.message);
         throw new Error('Translation failed');
     }
 }
