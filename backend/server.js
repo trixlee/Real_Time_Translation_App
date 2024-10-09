@@ -115,7 +115,7 @@ async function translateText(text, targetLanguage) {
         throw new Error('Translation failed');
     }
 }
-
+  
 // Start the server
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
