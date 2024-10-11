@@ -17,6 +17,8 @@ real-time-translation-app/
 │ ├── uploads/ # Stores uploaded files and transcription results
 │ └── server.js # Express.js server handling file uploads and processing 
 │ ├── frontend/ 
+| ├── Translation-backend
+| ├── translation_models
 │ └── index.html # Web interface for user interactions
 │ └── README.md # Project documentation
 
@@ -30,13 +32,14 @@ Before you begin, ensure that you have the following installed:
 
 ## Installation and Setup
 1. **Clone the repository**:
-   ```bash
+   ```
    git clone https://github.com/your-username/real-time-translation-app.git
 
 2. **Navigate to the project directory**:
    ```
     cd real-time-translation-app
    ```
+
 4. **Install the required dependencies: In the backend/ directory, run the following command**:
    ```
    npm install
@@ -65,11 +68,59 @@ Customization
 
 *You can add support for more languages by editing the dropdown in the frontend/index.html file. Simply add new <option> elements corresponding to the language codes supported by LibreTranslate.*
 
+
+
+
+## Setting Up the Translation Backend Server
+
+[if any error comethen do this!!]
+**To get this working on your machine uninstall the Python verson installes on the machine and download the [python 3.11.9](https://www.python.org/downloads/)version from official website**
+
+Trick to uninstall current version of python from your Machine: 
+(Only work if any-version of python is already installed in your machine if you never download the python in your machine simple download above version directly)
+First go to cmd run `python --version`` check the version already installed in your machine then go to Python official website and then download the version that is already persent in your machine and then it will download the [python-x.xx.x-amd64.exe] file, click on it Open it there you will see 3 option select last option of uninstall type text and there you go you succesfully uninstalled that version on your machine and after this done check the python version one more time you will get error now because now after doing this you don't have python in your machine now you can download this [python 3.11.9](https://www.python.org/downloads/)version from official website and then you are good to goo!!
+
+1. **Create a Folder for the Backend at root directory:**
+   Navigate to your project directory and create a folder named `Translation_backend`:
+
+   ``` 
+   mkdir Translation_backend  
+   cd Translation_backend 
+   ```
+
+2. **Clone LibreTranslate: Clone the LibreTranslate repository into the Translation_backend folder**:
+
+   ``` 
+   git clone https://github.com/LibreTranslate/LibreTranslate.git 
+   ```
+3. **Install Dependencies: Navigate into the cloned LibreTranslate directory and install the required dependencies**:
+
+   ```
+   cd LibreTranslate
+   pip mypython.toml
+   pip install .   
+   ```
+
+4. **Install Whisper: Ensure you have Whisper installed for transcription**:
+
+   ```
+   pip install git+https://github.com/openai/whisper.git
+   ```
+5. **Run the Backend: Execute the main.py file to start the Flask application:**
+
+   ```
+   python main.py
+   ```
+
+   
 ## Future Improvements
 
 **Audio Output**: Generate translated audio versions of the transcribed content.
 **Live Streaming Support**: Extend the app's functionality to support real-time translation of live audio and video streams.
 **Multi-File Upload**: Allow users to upload multiple files at once for batch processing.
+**Improve frontend design for a better user experience.**
+**Add more language options for translation.**
+**Implement error handling and loading indicators.**
 
 ## License
 *This project is open-source and available under the MIT License.*
