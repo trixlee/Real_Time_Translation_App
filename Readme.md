@@ -86,6 +86,8 @@ First go to cmd run `python --version`` check the version already installed in y
 - `translate_models`: Here we will get our all translation model of LibreTranslate
 
 
+## Translation_backend
+
 ### Now run this in root directory
 
    ``` 
@@ -116,62 +118,113 @@ First go to cmd run `python --version`` check the version already installed in y
    **after this edit the whole** `main.py` file located at **translation_backend/LibreTranslate/main.py**
 
    ```
-      import os
-      from flask import Flask, request, jsonify
-      from libretranslate import main as libretranslate_main
-      from argostranslate import package
-      from flask_cors import CORS
+import os
+from flask import Flask, request, jsonify
+from libretranslate import main as libretranslate_main
+from argostranslate import package
+from flask_cors import CORS
 
-         # Initialize the LibreTranslate server
-         app = libretranslate_main()  # This might need to be adapted based on the package structure
-         app = Flask(__name__)
-         CORS(app)  # Enable CORS for cross-origin requests
-   
-         def load_models(models_path):
-          # Ensure the models path exists
-          if not os.path.exists(models_path):
-           print(f"Models path does not exist: {models_path}")
-           return
-       
-          # Load all models from the specified directory
-         for model_file in os.listdir(models_path):
-           if model_file.endswith(".argosmodel"):  # Ensure you're looking for the correct model files
-               package.install_from_path(os.path.join(models_path, model_file))
-   
-            @app.route('/translate', methods=['POST'])
-          def translate():
-       data = request.get_json()
-       text = data.get('q')
-       target = data.get('target')
-       source = data.get('source')
-   
-       # Validate input
-       if not text or not target:
-           return jsonify({'error': 'Text and target language must be provided.'}), 400
-   
-          # Perform the translation using Argos Translate
-       try:
-           translated_text = package.translate(text, target, source)  # Adjust this call as per your model usage
-           return jsonify({'translatedText': translated_text})
-       except Exception as e:
-           return jsonify({'error': str(e)}), 500
-   
-       if __name__ == "__main__":
-       # Specify the path where your Argos Translate models are located
-       models_path = r'D:\Real_Time_Translation_App\translate_models'  # Adjust the path accordingly
-       
-       # Load the translation models
-       load_models(models_path)
-   
-       # Start the LibreTranslate server
-       app.run(port=5000, host='0.0.0.0', debug=True)  # Explicitly start the Flask app on port 5000
+# Initialize the LibreTranslate server
+app = libretranslate_main()  # This might need to be adapted based on the package structure
+app = Flask(__name__)
+CORS(app)  # Enable CORS for cross-origin requests
+
+def load_models(models_path):
+    # Ensure the models path exists
+    if not os.path.exists(models_path):
+        print(f"Models path does not exist: {models_path}")
+        return
+    
+    # Load all models from the specified directory
+    for model_file in os.listdir(models_path):
+        if model_file.endswith(".argosmodel"):  # Ensure you're looking for the correct model files
+            package.install_from_path(os.path.join(models_path, model_file))
+
+@app.route('/translate', methods=['POST'])
+def translate():
+    data = request.get_json()
+    text = data.get('q')
+    target = data.get('target')
+    source = data.get('source')
+
+    # Validate input
+    if not text or not target:
+        return jsonify({'error': 'Text and target language must be provided.'}), 400
+
+    # Perform the translation using Argos Translate
+    try:
+        translated_text = package.translate(text, target, source)  # Adjust this call as per your model usage
+        return jsonify({'translatedText': translated_text})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+if __name__ == "__main__":
+    # Specify the path where your Argos Translate models are located
+    models_path = r'D:\Real_Time_Translation_App\translate_models'  # Adjust the path accordingly
+    
+    # Load the translation models
+    load_models(models_path)
+
+    # Start the LibreTranslate server
+    app.run(port=5000, host='0.0.0.0', debug=True)  # Explicitly start the Flask app on port 5000
+
+```
+
+
+### 3.2 Additional Now we set up translate_backend
+   ```
+   cd translate_backend/LibreTranslate 
+   ```
+after this command you have to run this command:
 
    ```
+   python -m venv env
+   ```
+and then active the ven env by
+   ```
+   .\env\Scripts\activate
+   ```
+then
+   ```
+   pip install argostranslate
+   git clone https://github.com/argosopentech/argos-translate.git
+   ```
 
+then go to this location 
+   ```
+   cd translate_backend/LibreTranslate/argos-translate
+   ```
 
+ **next: make sure you has activated the (env) should look like this ![image](https://github.com/user-attachments/assets/a247a014-feb2-4fb5-a9b7-5f55a09692ee) and then run below command**
+   ```
+   pip install -e . 
+   ```
  
+   
+## translate_models 
+
+Now we set up the models for it, first run this command if not done
+   ```
+ mkdir translate_models
+ cd translate_models
+   ```
+
+and then after create a file in this folder `translate_models`
+and paste below code
+
+```
+
+```
 
 
+
+
+
+
+
+
+
+# until next consideration 
 4. **Install Whisper: Ensure you have Whisper installed for transcription**:
 
    ```
