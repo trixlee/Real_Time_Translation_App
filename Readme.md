@@ -81,7 +81,12 @@ Trick to uninstall current version of python from your Machine:
 First go to cmd run `python --version`` check the version already installed in your machine then go to Python official website and then download the version that is already persent in your machine and then it will download the [python-x.xx.x-amd64.exe] file, click on it Open it there you will see 3 option select last option of uninstall type text and there you go you succesfully uninstalled that version on your machine and after this done check the python version one more time you will get error now because now after doing this you don't have python in your machine now you can download this [python 3.11.9](https://www.python.org/downloads/)version from official website and then you are good to goo!!
 
 1. **Create a Folder for the Backend at root directory:**
-   Navigate to your project directory and create a folder named `Translation_backend`:
+   Navigate to your project directory and create two folders named as 
+- `Translation_backend`: Here we will install LibreTranslate Locally
+- `translate_models`: Here we will get our all translation model of LibreTranslate
+
+
+### Now run this in root directory
 
    ``` 
    mkdir Translation_backend  
@@ -97,9 +102,75 @@ First go to cmd run `python --version`` check the version already installed in y
 
    ```
    cd LibreTranslate
-   pip mypython.toml
    pip install .   
    ```
+### 3.1 Additionalon :
+   ```
+   Install Flask-CORS
+   ```
+
+   **Open your terminal or command prompt and run the following command:**
+   `
+   pip install Flask-CORS
+   `
+   **after this edit the whole** `main.py` file located at **translation_backend/LibreTranslate/main.py**
+
+   ```
+      import os
+      from flask import Flask, request, jsonify
+      from libretranslate import main as libretranslate_main
+      from argostranslate import package
+      from flask_cors import CORS
+
+         # Initialize the LibreTranslate server
+         app = libretranslate_main()  # This might need to be adapted based on the package structure
+         app = Flask(__name__)
+         CORS(app)  # Enable CORS for cross-origin requests
+   
+         def load_models(models_path):
+          # Ensure the models path exists
+          if not os.path.exists(models_path):
+           print(f"Models path does not exist: {models_path}")
+           return
+       
+          # Load all models from the specified directory
+         for model_file in os.listdir(models_path):
+           if model_file.endswith(".argosmodel"):  # Ensure you're looking for the correct model files
+               package.install_from_path(os.path.join(models_path, model_file))
+   
+            @app.route('/translate', methods=['POST'])
+          def translate():
+       data = request.get_json()
+       text = data.get('q')
+       target = data.get('target')
+       source = data.get('source')
+   
+       # Validate input
+       if not text or not target:
+           return jsonify({'error': 'Text and target language must be provided.'}), 400
+   
+          # Perform the translation using Argos Translate
+       try:
+           translated_text = package.translate(text, target, source)  # Adjust this call as per your model usage
+           return jsonify({'translatedText': translated_text})
+       except Exception as e:
+           return jsonify({'error': str(e)}), 500
+   
+       if __name__ == "__main__":
+       # Specify the path where your Argos Translate models are located
+       models_path = r'D:\Real_Time_Translation_App\translate_models'  # Adjust the path accordingly
+       
+       # Load the translation models
+       load_models(models_path)
+   
+       # Start the LibreTranslate server
+       app.run(port=5000, host='0.0.0.0', debug=True)  # Explicitly start the Flask app on port 5000
+
+   ```
+
+
+ 
+
 
 4. **Install Whisper: Ensure you have Whisper installed for transcription**:
 
