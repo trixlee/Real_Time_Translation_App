@@ -106,12 +106,8 @@ First go to cmd run `python --version`` check the version already installed in y
    cd LibreTranslate
    pip install .   
    ```
-### 3.1 Additionalon :
-   ```
-   Install Flask-CORS
-   ```
-
-   **Open your terminal or command prompt and run the following command:**
+### 3.1 Additional :
+   `Install Flask-CORS` **Open your terminal or command prompt and run the following command:**
    `
    pip install Flask-CORS
    `
@@ -209,35 +205,178 @@ Now we set up the models for it, first run this command if not done
  cd translate_models
    ```
 
-and then after create a file in this folder `translate_models`
-and paste below code
+**then make a file inside it names as "setup_language_packages.py" ** 
+and then copy paste below code 
+working of code: First it will Download all models completely and then shows it dowloaded location(per download) and then after downloading all 92 models then move it from its location to inside our `translate_models` folder . Keep Patience each model takes approx 500mb,800mb,1.1Gb space
+### Will take some time to downloade the model and then will take some more time to move it!!
+
+```
+import os
+import shutil
+import logging
+from argostranslate import package
+
+# Set up logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+# Define the directory where you want to move the downloaded models
+TARGET_DIR = os.path.join(os.getcwd(), 'translate_models')
+
+def update_package_index():
+    """Fetch available language packages with error handling."""
+    try:
+        logging.info("Updating language package index...")
+        available_packages = package.get_available_packages()
+        logging.info(f"Found {len(available_packages)} available language packages.")
+        return available_packages
+    except Exception as e:
+        logging.error(f"Failed to update package index: {str(e)}")
+        return []
+
+def check_existing_models(target_dir):
+    """Check for existing downloaded models in the target directory."""
+    try:
+        if os.path.exists(target_dir) and os.listdir(target_dir):
+            logging.info(f"Existing models detected in: {target_dir}")
+            return True  # Models exist
+        return False  # No models found
+    except Exception as e:
+        logging.error(f"Error checking models in {target_dir}: {str(e)}")
+        return False
+
+def install_language_package(language_package):
+    """Download and install the specified language package."""
+    try:
+        logging.info(f"Attempting to install: {language_package.from_code} -> {language_package.to_code}")
+
+        # Check if the package is already installed
+        installed_packages = package.get_installed_packages()
+        if any(p.from_code == language_package.from_code and p.to_code == language_package.to_code for p in installed_packages):
+            logging.info(f"Package {language_package.from_code} -> {language_package.to_code} is already installed.")
+            return None
+
+        # Download the package
+        downloaded_path = language_package.download()
+        logging.info(f"Downloaded package {language_package.from_code} -> {language_package.to_code} to {downloaded_path}")
+
+        # Install the package
+        package.install_from_path(downloaded_path)
+        logging.info(f"Successfully installed {language_package.from_code} -> {language_package.to_code}")
+
+        return downloaded_path
+    except Exception as e:
+        logging.error(f"Failed to install {language_package.from_code} -> {language_package.to_code}: {str(e)}")
+        return None
+
+def move_package_to_target(source_path, target_dir):
+    """Move the downloaded package to the specified target directory."""
+    if not source_path or not os.path.exists(source_path):
+        logging.warning(f"Source path invalid: {source_path}")
+        return None
+    
+    try:
+        package_name = os.path.basename(source_path)
+        target_path = os.path.join(target_dir, package_name)
+
+        # Create target directory if it doesn't exist
+        os.makedirs(target_dir, exist_ok=True)
+
+        # Move the package
+        shutil.move(source_path, target_path)
+        logging.info(f"Moved package to {target_path}.")
+        return target_path
+    except Exception as e:
+        logging.error(f"Error moving package from {source_path} to {target_dir}: {str(e)}")
+        return None
+
+def main():
+    """Main function to handle the workflow of installing and moving language packages."""
+    try:
+        # Check for existing models
+        if check_existing_models(TARGET_DIR):
+            return  # Exit if models are already present
+
+        # Update package index and install packages
+        available_packages = update_package_index()
+        if not available_packages:
+            logging.warning("No available language packages found.")
+            return
+
+        downloaded_paths = []
+        for language_package in available_packages:
+            downloaded_path = install_language_package(language_package)
+            if downloaded_path:
+                downloaded_paths.append(downloaded_path)
+
+        # Move the downloaded packages
+        for source_path in downloaded_paths:
+            new_location = move_package_to_target(source_path, TARGET_DIR)
+            if new_location:
+                logging.info(f"Package moved to {new_location}")
+            else:
+                logging.warning(f"Failed to move package from {source_path}")
+
+        logging.info("All packages have been processed successfully.")
+
+    except Exception as e:
+        logging.critical(f"An unexpected error occurred: {str(e)}", exc_info=True)
+
+if __name__ == "__main__":
+    main()
 
 ```
 
+**Then Run this command**
+```
+python setup_language_packages.py
 ```
 
+## Additional we have to set 'argos-translate' and 'argospm' to our path environment variables so that it can be access gloabaly in our system
+Simply open new cmd at root of project run this command
+```
+where python
+```
+it will show you the location then open it on file-explorer and then check `argo-translate` and `argospm` copy the path of these two folder by doing right click on it and then select copy-path and then place it inside path
+
+run on windows search
+```
+edit the system environment variables
+```
+1.Go to Environment Variables on your computer.
+2. Find Path under both User and System variables (you need to do this step twice: once for each).
+3. Select Path, click Edit, and then click New.
+4. Paste the location path (which you copied by right-clicking and selecting Copy as path) for the argo-translate folder.
+5. Click New again and repeat the process for the argospm folder.
+
+**Do the same steps for both User and System variables. You need to click New twice each time.**
+![377497898-000168d2-d1e2-4411-8bcd-3bf8851ef97d](https://github.com/user-attachments/assets/e9795bb3-879e-423b-83e5-e037aa0e29f0)
+
+ 
+`D:\Python 311\Scripts\argos-translate` and `D:\Python 311\Scripts\argospm` and place it inside your path environment 
+
+## should look like this for both System and User variables
+![Screenshot 2024-10-17 193618](https://github.com/user-attachments/assets/5d7b76bd-2a2d-461f-98e4-7b6dc241ae6a)
 
 
-
-
-
-
-
-
-# until next consideration 
-4. **Install Whisper: Ensure you have Whisper installed for transcription**:
+4. **Recheck the whipser Installation at root dir** 
+**Install Whisper: Ensure you have Whisper installed for transcription**:
 
    ```
    pip install git+https://github.com/openai/whisper.git
    ```
-5. **Run the Backend: Execute the main.py file to start the Flask application:**
+5. **then Open new cmd console and go to (at root)**
+
+```
+cd Translation_backend/LibreTranslate
+```` 
+  **Run the Backend: Execute the main.py file to start the Flask application:**
 
    ```
    python main.py
    ```
 
    
-## Future Improvements
+# Future Improvements
 
 **Audio Output**: Generate translated audio versions of the transcribed content.
 **Live Streaming Support**: Extend the app's functionality to support real-time translation of live audio and video streams.
