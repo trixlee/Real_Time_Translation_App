@@ -165,7 +165,11 @@ if __name__ == "__main__":
     app.run(port=5000, host='0.0.0.0', debug=True)  # Explicitly start the Flask app on port 5000
 
 ```
-
+### check this line in above main.py file and chnage the location according to your Directory location
+```
+# Specify the path where your Argos Translate models are located 
+models_path = r'D:\Real_Time_Translation_App\translate_models\translate_models'  # Adjust the path accordingly
+```
 
 ### 3.2 Additional Now we set up translate_backend
    ```
