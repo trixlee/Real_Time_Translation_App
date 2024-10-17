@@ -155,8 +155,8 @@ def translate():
         return jsonify({'error': str(e)}), 500
 
 if __name__ == "__main__":
-    # Specify the path where your Argos Translate models are located
-    models_path = r'D:\Real_Time_Translation_App\translate_models'  # Adjust the path accordingly
+    # Specify the path where your Argos Translate models are located 
+    models_path = r'D:\Real_Time_Translation_App\translate_models\translate_models'  # Adjust the path accordingly
     
     # Load the translation models
     load_models(models_path)
