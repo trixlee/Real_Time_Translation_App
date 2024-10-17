@@ -218,6 +218,7 @@ working of code: First it will Download all models completely and then shows it 
 import os
 import shutil
 import logging
+import asyncio
 from argostranslate import package
 
 # Set up logging
@@ -248,7 +249,7 @@ def check_existing_models(target_dir):
         logging.error(f"Error checking models in {target_dir}: {str(e)}")
         return False
 
-def install_language_package(language_package):
+async def install_language_package(language_package):
     """Download and install the specified language package."""
     try:
         logging.info(f"Attempting to install: {language_package.from_code} -> {language_package.to_code}")
@@ -259,41 +260,44 @@ def install_language_package(language_package):
             logging.info(f"Package {language_package.from_code} -> {language_package.to_code} is already installed.")
             return None
 
-        # Download the package
-        downloaded_path = language_package.download()
-        logging.info(f"Downloaded package {language_package.from_code} -> {language_package.to_code} to {downloaded_path}")
+        # Download and install the package directly
+        package_path = language_package.download()
+        if not package_path:
+            logging.error(f"Failed to download package {language_package.from_code} -> {language_package.to_code}.")
+            return None
 
         # Install the package
-        package.install_from_path(downloaded_path)
+        package.install_from_path(package_path)
         logging.info(f"Successfully installed {language_package.from_code} -> {language_package.to_code}")
 
-        return downloaded_path
+        return package_path
     except Exception as e:
         logging.error(f"Failed to install {language_package.from_code} -> {language_package.to_code}: {str(e)}")
         return None
 
-def move_package_to_target(source_path, target_dir):
+def move_package_to_target(source_path, target_dir, language_package):
     """Move the downloaded package to the specified target directory."""
     if not source_path or not os.path.exists(source_path):
         logging.warning(f"Source path invalid: {source_path}")
         return None
     
     try:
-        package_name = os.path.basename(source_path)
-        target_path = os.path.join(target_dir, package_name)
+        # Create a new directory for this specific package
+        package_folder_name = f"{language_package.from_code}_to_{language_package.to_code}"
+        package_folder_path = os.path.join(target_dir, package_folder_name)
 
         # Create target directory if it doesn't exist
-        os.makedirs(target_dir, exist_ok=True)
+        os.makedirs(package_folder_path, exist_ok=True)
 
-        # Move the package
-        shutil.move(source_path, target_path)
-        logging.info(f"Moved package to {target_path}.")
-        return target_path
+        # Move the package to the new directory
+        shutil.move(source_path, package_folder_path)
+        logging.info(f"Moved package to {package_folder_path}.")
+        return package_folder_path
     except Exception as e:
         logging.error(f"Error moving package from {source_path} to {target_dir}: {str(e)}")
         return None
 
-def main():
+async def main():
     """Main function to handle the workflow of installing and moving language packages."""
     try:
         # Check for existing models
@@ -306,19 +310,19 @@ def main():
             logging.warning("No available language packages found.")
             return
 
-        downloaded_paths = []
-        for language_package in available_packages:
-            downloaded_path = install_language_package(language_package)
-            if downloaded_path:
-                downloaded_paths.append(downloaded_path)
+        tasks = [install_language_package(language_package) for language_package in available_packages]
+
+        # Run the download tasks concurrently
+        downloaded_paths = await asyncio.gather(*tasks)
 
         # Move the downloaded packages
-        for source_path in downloaded_paths:
-            new_location = move_package_to_target(source_path, TARGET_DIR)
-            if new_location:
-                logging.info(f"Package moved to {new_location}")
-            else:
-                logging.warning(f"Failed to move package from {source_path}")
+        for source_path, language_package in zip(downloaded_paths, available_packages):
+            if source_path:
+                new_location = move_package_to_target(source_path, TARGET_DIR, language_package)
+                if new_location:
+                    logging.info(f"Package moved to {new_location}")
+                else:
+                    logging.warning(f"Failed to move package from {source_path}")
 
         logging.info("All packages have been processed successfully.")
 
@@ -326,7 +330,8 @@ def main():
         logging.critical(f"An unexpected error occurred: {str(e)}", exc_info=True)
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
+
 
 ```
 
