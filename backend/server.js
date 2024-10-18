@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors'); // Add this line
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
@@ -7,6 +8,9 @@ const axios = require('axios');
 
 const app = express();
 const port = 3000;
+
+// Enable CORS
+app.use(cors()); // Add this line
 
 // Middleware to parse JSON and form data
 app.use(express.json());
@@ -77,7 +81,7 @@ app.post('/upload', upload.single('file'), (req, res) => {
 
             console.log('Starting translation via LibreTranslate...');
 
-            // Translate the transcribed text
+            // Translate the transcribed text using the local server
             const translatedText = await translateText(transcribedText, targetLanguage);
 
             console.log('LibreTranslate completed successfully.');
@@ -97,13 +101,13 @@ app.post('/upload', upload.single('file'), (req, res) => {
     });
 });
 
-// Function to translate text using LibreTranslate API
+// Function to translate text using local LibreTranslate API
 async function translateText(text, targetLanguage) {
     try {
         console.log('Text to translate:', text);  // Log the text to be translated
         console.log('Target Language for translation:', targetLanguage);  // Log the target language
 
-        const response = await axios.post('https://libretranslate.com/translate', {
+        const response = await axios.post('http://127.0.0.1:5000/translate', {
             q: text,
             target: targetLanguage,
             source: 'auto'  // Auto-detect source language
@@ -115,7 +119,17 @@ async function translateText(text, targetLanguage) {
         throw new Error('Translation failed');
     }
 }
-  
+
+app.get('/languages', async (req, res) => {
+    try {
+        const response = await axios.get('http://127.0.0.1:5000/languages');
+        return res.json(response.data);
+    } catch (error) {
+        console.error('Error fetching languages:', error.message);
+        return res.status(500).json({ message: 'Failed to fetch languages' });
+    }
+});
+
 // Start the server
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
